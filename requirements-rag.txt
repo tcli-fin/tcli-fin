@@ -1,0 +1,16 @@
+# RAG Pipeline Dependencies for FinBench
+# Install with: pip install -r requirements-rag.txt
+
+# Core RAG dependencies
+sentence-transformers>=2.3.0
+faiss-cpu>=1.7.4
+# For GPU support, use faiss-gpu instead:
+# faiss-gpu>=1.7.4
+
+# Additional dependencies (usually installed with sentence-transformers)
+torch>=2.0.0
+transformers>=4.30.0
+numpy>=1.24.0
+
+# Optional: For better performance
+# accelerate>=0.20.0  # For faster model loading

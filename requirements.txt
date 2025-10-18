@@ -1,0 +1,24 @@
+openai>=1.40.0
+numpy>=1.26.0
+pandas>=2.0.0
+sentence-transformers>=2.2.2
+tqdm>=4.66.0
+scikit-learn>=1.3.0
+python-dotenv>=1.0.0
+google-generativeai>=0.7.2
+anthropic[bedrock]>=0.36.0
+pydantic>=2.5.0
+
+# Additional dependencies for financial benchmarks
+datasets>=2.20.0
+evaluate>=0.4.0
+rapidfuzz>=3.0.0
+fugashi>=1.0.0
+lxml>=4.9.0
+beautifulsoup4>=4.12.0
+unstructured[pdf]>=0.10.0
+pypdf>=3.0.0
+PyMuPDF>=1.23.0
+tyro>=0.5.0
+PyYAML>=6.0.0
+

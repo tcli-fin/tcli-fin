@@ -1,0 +1,574 @@
+# FinBench Configuration File
+# This file defines datasets, models, RAG configs, and experiments for the unified benchmarking system
+
+# RAG (Retrieval-Augmented Generation) configurations
+rag_configs:
+  # Default RAG configuration - best quality
+  default_rag:
+    enabled: true
+    embedding_model: "BAAI/bge-large-en-v1.5"
+    embedding_batch_size: 32
+    chunk_size: 512
+    chunk_overlap: 50
+    use_semantic_chunking: false
+    top_k: 20
+    top_k_rerank: 5
+    use_reranker: true
+    reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    vector_store_type: "faiss"
+    faiss_index_type: "IndexFlatIP"
+    use_gpu: false
+    cache_dir: ".rag_cache"
+    cache_enabled: true
+    debug: false
+    print_chunks: false
+    print_retrieval: false
+    log_retrieval_stats: true
+    normalize_embeddings: true
+    add_metadata_to_chunks: true
+
+  # Fast RAG configuration - lower quality but faster
+  fast_rag:
+    enabled: true
+    embedding_model: "BAAI/bge-small-en-v1.5"
+    embedding_batch_size: 64
+    chunk_size: 256
+    chunk_overlap: 25
+    use_semantic_chunking: false
+    top_k: 10
+    top_k_rerank: 3
+    use_reranker: false  # No reranking for speed
+    vector_store_type: "faiss"
+    faiss_index_type: "IndexFlatIP"
+    use_gpu: false
+    cache_dir: ".rag_cache"
+    cache_enabled: true
+    debug: false
+    print_chunks: false
+    print_retrieval: false
+    log_retrieval_stats: true
+    normalize_embeddings: true
+    add_metadata_to_chunks: true
+
+  # Semantic chunking RAG - best for long documents
+  semantic_rag:
+    enabled: true
+    embedding_model: "BAAI/bge-large-en-v1.5"
+    embedding_batch_size: 32
+    chunk_size: 512
+    chunk_overlap: 50
+    use_semantic_chunking: true  # Use sentence boundaries
+    top_k: 20
+    top_k_rerank: 5
+    use_reranker: true
+    reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    vector_store_type: "faiss"
+    faiss_index_type: "IndexFlatIP"
+    use_gpu: false
+    cache_dir: ".rag_cache"
+    cache_enabled: true
+    debug: false
+    print_chunks: false
+    print_retrieval: false
+    log_retrieval_stats: true
+    normalize_embeddings: true
+    add_metadata_to_chunks: true
+
+  # Debug RAG - for testing and debugging
+  debug_rag:
+    enabled: true
+    embedding_model: "BAAI/bge-small-en-v1.5"
+    embedding_batch_size: 8
+    chunk_size: 256
+    chunk_overlap: 25
+    use_semantic_chunking: false
+    top_k: 10
+    top_k_rerank: 3
+    use_reranker: true
+    reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    vector_store_type: "faiss"
+    faiss_index_type: "IndexFlatIP"
+    use_gpu: false
+    cache_dir: ".rag_cache_debug"
+    cache_enabled: true
+    debug: true  # Enable debug logging
+    print_chunks: true  # Print all chunks
+    print_retrieval: true  # Print retrieval results
+    log_retrieval_stats: true
+    normalize_embeddings: true
+    add_metadata_to_chunks: true
+
+# Dataset configurations
+datasets:
+  docfinqa:
+    type: docfinqa
+    path: data/docfinqa
+    splits: [train, dev, test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocFinQA: Financial QA over full SEC filings (avg 123k words, ~100k tokens). For coding agents, provides complete filing context. For retrieval-based approaches, use benchmarks/benchmark_docfinqa.py"
+
+  finqa:
+    type: finqa
+    path: data/finqa
+    splits: [train, dev, test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "FinQA: Numerical reasoning over financial data"
+
+  tatqa:
+    type: tatqa
+    path: data/tatqa
+    splits: [train, dev, test]
+    has_context: true
+    has_program: false
+    has_answer: true
+    include_all_questions: false  # Include only the specific question being asked
+    description: "TAT-QA: Table and text hybrid QA (single question in context.md)"
+
+  docmath_eval:
+    type: docmath_eval
+    path: data/docmath_eval
+    splits: [compshort_test, complong_test, simpshort_test, simplong_test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocMath-Eval: Math QA over financial documents. For coding agents: provides full document (long-context variant). NO RAG/retrieval."
+  
+  docmath_test: 
+    type: docmath_eval
+    path: data/docmath_eval
+    splits: [complong_testmini]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocMath-Eval: Math QA over financial documents. For coding agents: provides full document (long-context variant). NO RAG/retrieval." 
+  
+  docmath_test_compshort: 
+    type: docmath_eval
+    path: data/docmath_eval
+    splits: [compshort_testmini]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocMath-Eval: Math QA over financial documents. For coding agents: provides full document (long-context variant). NO RAG/retrieval." 
+  
+  docmath_test_simpshort:
+    type: docmath_eval
+    path: data/docmath_eval
+    splits: [simpshort_testmini]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocMath-Eval: Math QA over financial documents. For coding agents: provides full document (long-context variant). NO RAG/retrieval." 
+ 
+  docmath_test_simplong:
+    type: docmath_eval
+    path: data/docmath_eval
+    splits: [simplong_testmini]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocMath-Eval: Math QA over financial documents. For coding agents: provides full document (long-context variant). NO RAG/retrieval."
+  
+
+  # Test-split-only dataset aliases for clean test-only runs
+  docfinqa_test:
+    type: docfinqa
+    path: data/docfinqa
+    splits: [test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocFinQA (test only)"
+
+  # Test-only using the full DocFinQA path
+  docfinqa_test_only:
+    type: docfinqa
+    path: data/docfinqa
+    splits: [test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "DocFinQA (test split only, full dataset path)"
+
+  finqa_test:
+    type: finqa
+    path: data/finqa
+    splits: [test]
+    has_context: true
+    has_program: true
+    has_answer: true
+    description: "FinQA (test only)"
+
+  tatqa_test:
+    type: tatqa
+    path: data/tatqa
+    splits: [test]
+    has_context: true
+    has_program: false
+    has_answer: true
+    include_all_questions: false  # Single question (matches TAT-LLM paper)
+    description: "TAT-QA test split (single question in context.md)"
+
+  tatqa_test_all_questions:
+    type: tatqa
+    path: data/tatqa
+    splits: [test]
+    has_context: true
+    has_program: false
+    has_answer: true
+    include_all_questions: true  # All questions from context
+    description: "TAT-QA test split (all questions in context.md)"
+
+# Model configurations
+models:
+  gemini-pro:
+    provider: gemini
+    model_name: gemini-2.5-pro
+    api_key_env: GEMINI_API_KEY
+    max_tokens: 32768
+    temperature: 0.0
+
+  gemini-flash:
+    provider: gemini
+    model_name: gemini-2.5-flash
+    api_key_env: GEMINI_API_KEY
+    max_tokens: 32768
+    temperature: 0.0
+
+  gpt4o-mini:
+    provider: openai
+    model_name: gpt-4o-mini
+    api_key_env: OPENAI_API_KEY
+    max_tokens: 32768
+    temperature: 0.0
+
+  gpt4o:
+    provider: openai
+    model_name: gpt-4o
+    api_key_env: OPENAI_API_KEY
+    max_tokens: 32768
+    temperature: 0.0
+
+  claude-sonnet:
+    provider: anthropic-bedrock
+    model_name: us.anthropic.claude-sonnet-4-20250514-v1:0
+    max_tokens: 64000
+    temperature: 0.0
+    thinking_budget: 40000
+
+  # OpenRouter judge model (Qwen/QwQ-32B)
+  openrouter-qwq-32b-judge:
+    provider: openrouter
+    model_name: qwen/qwq-32b
+    api_key_env: OPENROUTER_API_KEY
+    max_tokens: 8192
+    temperature: 0.0
+
+  # OpenRouter Grok model (2M context)
+  openrouter-grok-fast-reasoning-high:
+    provider: openrouter
+    model_name: x-ai/grok-4-fast
+    api_key_env: OPENROUTER_API_KEY
+    max_tokens: 1000000
+    temperature: 0.0
+    provider_kwargs:
+      reasoning:
+        effort: "high"
+
+  # Coding Agent configurations
+  claude-code-sonnet:
+    provider: agent
+    agent_name: claude-code
+    model_name: null
+    cli_command: claude
+    cli_args: ["--output-format", "json"]
+    workspace_dir: temp/claude_workspace
+    timeout: 300
+    keep_workspace: true
+
+  claude-code-haiku:
+    provider: agent
+    agent_name: claude-code
+    model_name: claude-3-5-haiku-20241022
+    cli_command: claude
+    cli_args: ["--output-format", "json"]
+    workspace_dir: temp/claude_workspace
+    timeout: 300
+    keep_workspace: true
+
+  # Gemini CLI configurations
+  gemini-cli-pro:
+    provider: agent
+    agent_name: gemini-cli
+    model_name: gemini-2.5-pro
+    cli_command: gemini
+    cli_args: ["-a", "--output-format", "json"]
+    workspace_dir: temp/gemini_workspace
+    timeout: 300
+    keep_workspace: true
+
+  gemini-cli-flash:
+    provider: agent
+    agent_name: gemini-cli
+    model_name: gemini-2.5-flash
+    cli_command: gemini
+    cli_args: ["-a", "--output-format", "json"]
+    workspace_dir: temp/gemini_workspace
+    timeout: 300
+    keep_workspace: true
+
+  # Codex CLI configurations
+  codex-cli-default:
+    provider: agent
+    agent_name: codex-cli
+    model_name: null
+    cli_command: codex
+    cli_args: ["--json", "--full-auto"]
+    workspace_dir: temp/codex_workspace
+    timeout: 300
+    keep_workspace: true
+
+  codex-cli-o3:
+    provider: agent
+    agent_name: codex-cli
+    model_name: o3
+    cli_command: codex
+    cli_args: ["--json", "--full-auto"]
+    workspace_dir: temp/codex_workspace
+    timeout: 300
+    keep_workspace: true
+
+  # Trae Agent configurations
+  trae-agent-default:
+    provider: agent
+    agent_name: trae-agent
+    model_name: null
+    cli_command: trae-cli
+    cli_args: []
+    workspace_dir: temp/trae_workspace
+    timeout: 300
+    keep_workspace: true
+
+  trae-agent-gpt4:
+    provider: agent
+    agent_name: trae-agent
+    model_name: gpt-4
+    cli_command: trae-cli
+    cli_args: ["-p", "openai"]
+    workspace_dir: temp/trae_workspace
+    timeout: 300
+    keep_workspace: true
+
+# Experiment configurations
+experiments:
+  # Quick test experiment for validation
+  quick_test:
+    datasets: [docfinqa, finqa, tatqa]
+    models: []
+    evaluation_mode: direct_answer
+    concurrency: 5
+    limit: 3
+    judge_model: openrouter-qwq-32b-judge
+
+  # Comprehensive evaluation across all datasets
+  comprehensive_eval:
+    datasets: [docfinqa, finqa, tatqa, docmath_eval]
+    models: [gemini-pro, gpt4o-mini, claude-sonnet]
+    evaluation_mode: direct_answer
+    concurrency: 10
+    max_retries: 5
+    judge_model: openrouter-qwq-32b-judge
+
+  # FinQA-focused experiment
+  finqa_study:
+    datasets: [finqa]
+    models: [gemini-pro, gpt4o-mini]
+    evaluation_mode: program_execution
+    concurrency: 8
+    limit: 100
+    judge_model: openrouter-qwq-32b-judge
+
+  # Model comparison across multiple providers
+  model_comparison:
+    datasets: [docfinqa, finqa, tatqa]
+    models: [gemini-pro, gpt4o-mini, claude-sonnet]
+    evaluation_mode: direct_answer
+    concurrency: 12
+    limit: 25
+    judge_model: openrouter-qwq-32b-judge
+
+  # Agent evaluation experiments
+  agent_comparison:
+    datasets: [finqa, tatqa]
+    models: [gemini-pro, claude-code-sonnet, gemini-cli-pro]
+    evaluation_mode: agent
+    concurrency: 3
+    limit: 10
+    judge_model: openrouter-qwq-32b-judge
+  
+  docfinqa_trae_agent_test:
+    datasets: [docfinqa_test]
+    models: [trae-agent-default]
+    evaluation_mode: agent
+    concurrency: 1
+    judge_model: openrouter-qwq-32b-judge
+    limit: 3
+
+  # Per-benchmark agent experiments on test sets only
+  docfinqa_agent_test:
+    datasets: [docfinqa_test]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 1
+    judge_model: openrouter-qwq-32b-judge
+
+  finqa_agent_test:
+    datasets: [finqa_test]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 1
+    judge_model: openrouter-qwq-32b-judge
+    limit: 10
+
+  tatqa_agent_test:
+    datasets: [tatqa_test]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 10
+    judge_model: openrouter-qwq-32b-judge
+    description: "TAT-QA test with Codex (single question in context.md)"
+
+  tatqa_agent_test_all_questions:
+    datasets: [tatqa_test_all_questions]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 10
+    judge_model: openrouter-qwq-32b-judge
+    description: "TAT-QA test with Codex (all questions in context.md)"
+
+  # Run DocFinQA with Gemini CLI agent
+  docfinqa_gemini_cli:
+    datasets: [docfinqa]
+    models: [gemini-cli-pro]
+    evaluation_mode: agent
+    concurrency: 1
+
+  # Test-set only + LLM-as-a-Judge (OpenRouter QwQ-32B)
+  docfinqa_gemini_cli_test_judge_openrouter:
+    datasets: [docfinqa_test_only]
+    models: [gemini-cli-pro]
+    evaluation_mode: agent
+    concurrency: 10
+    judge_model: openrouter-qwq-32b-judge
+
+  # Test-set only + LLM-as-a-Judge (Gemini API)
+  docfinqa_gemini_cli_test_judge_gemini:
+    datasets: [docfinqa_test_only]
+    models: [gemini-cli-pro]
+    evaluation_mode: agent
+    concurrency: 1
+    judge_model: gemini-pro
+
+  # Claude Code CLI on DocFinQA test set with OpenRouter judge
+  docfinqa_claude_code_test:
+    datasets: [docfinqa_test_only]
+    models: [claude-code-sonnet]
+    evaluation_mode: agent
+    concurrency: 5
+    judge_model: openrouter-qwq-32b-judge
+
+  # Codex CLI on DocFinQA test set with OpenRouter judge
+  docfinqa_codex_test:
+    datasets: [docfinqa_test_only]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 10
+    judge_model: openrouter-qwq-32b-judge
+
+  # Test Grok with full context (quick test)
+  test_grok:
+    datasets: [docfinqa_test_only]
+    models: [openrouter-grok-fast-reasoning-high]
+    evaluation_mode: direct_answer
+    concurrency: 1
+    limit: 3
+    judge_model: openrouter-qwq-32b-judge
+
+  # Full DocFinQA test with Grok (all samples)
+  docfinqa_grok_full:
+    datasets: [docfinqa_test_only]
+    models: [openrouter-grok-fast-reasoning-high]
+    evaluation_mode: direct_answer
+    concurrency: 5 
+    judge_model: openrouter-qwq-32b-judge
+
+  docmath_agent_test:
+    datasets: [docmath_test_simplong]
+    models: [codex-cli-default]
+    evaluation_mode: agent
+    concurrency: 1
+    judge_model: openrouter-qwq-32b-judge
+
+  # RAG-based experiments
+  # Test RAG on DocFinQA with Gemini Flash (default RAG config)
+  docfinqa_rag_test:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash]
+    evaluation_mode: retrieval_augmented
+    rag_config: default_rag
+    concurrency: 5
+    limit: 10
+    judge_model: openrouter-qwq-32b-judge
+
+  # Full DocFinQA test with RAG (all samples)
+  docfinqa_rag_full:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash]
+    evaluation_mode: retrieval_augmented
+    rag_config: default_rag
+    concurrency: 10
+    judge_model: openrouter-qwq-32b-judge
+
+  # Fast RAG for quick testing
+  docfinqa_rag_fast:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash]
+    evaluation_mode: retrieval_augmented
+    rag_config: fast_rag
+    concurrency: 10
+    limit: 20
+    judge_model: openrouter-qwq-32b-judge
+
+  # Semantic chunking RAG
+  docfinqa_rag_semantic:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash]
+    evaluation_mode: retrieval_augmented
+    rag_config: semantic_rag
+    concurrency: 5
+    limit: 10
+    judge_model: openrouter-qwq-32b-judge
+
+  # Debug RAG with all debugging output
+  docfinqa_rag_debug:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash]
+    evaluation_mode: retrieval_augmented
+    rag_config: debug_rag
+    concurrency: 1
+    limit: 1
+    judge_model: openrouter-qwq-32b-judge
+
+  # Compare RAG vs Full Context on same model
+  docfinqa_comparison_rag_vs_full:
+    datasets: [docfinqa_test_only]
+    models: [gemini-flash, gpt4o-mini]
+    evaluation_mode: retrieval_augmented
+    rag_config: default_rag
+    concurrency: 5
+    limit: 50
+    judge_model: openrouter-qwq-32b-judge
